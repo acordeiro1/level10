@@ -35,7 +35,7 @@ char ** loadFileAA(char *filename, int *size)
 	char temp[1000]; // Temporary buffer to hold each line
 
 	// Read the file line by line.
-	while (fgets(temp, sizeof(temp), file) != NULL) //if it reaches the end of file
+	while (fgets(temp, sizeof(temp), in) != NULL) //if it reaches the end of file
     {
     //   Trim newline.
         size_t length = strlen(temp);
@@ -45,30 +45,30 @@ char ** loadFileAA(char *filename, int *size)
         }
 
 	//   Expand array if necessary (realloc). size = capacity
-	if (*size == capacity)
-    {
-        capacity += 10;
-
-		// Allocate memory for the string (str).
-	 	char **str = realloc(arr, capacity * sizeof(char *));
-		if (!str) 
+	    if (*size == capacity)
         {
-            printf("Memory reallocation failed\n");
-            for (int i = 0; i < *size; i++) 
+            capacity += 10;
+
+	//   Allocate memory for the string (str).
+	 	    char **str = realloc(arr, capacity * sizeof(char *));
+		    if (!str) 
             {
-                free(arr[i]);
+                printf("Memory reallocation failed\n");
+                for (int i = 0; i < *size; i++) 
+                {
+                    free(arr[i]);
+                }
+                free(arr);
+                fclose(in);
+                exit(1);
             }
-            free(arr);
-            fclose(in);
-            exit(1);
+            arr = str;
         }
-        arr = str;
 
 	//   Attach the string to the large array (assignment =).
-        arr[*size] = malloc(strlen(str) + 1);
+        arr[*size] = malloc(strlen(temp) + 1);
         if (!arr[*size]) 
         {
-            printf("Memory allocation for string failed\n");
             for (int i = 0; i < *size; i++) 
             {
                 free(arr[i]);
@@ -78,13 +78,14 @@ char ** loadFileAA(char *filename, int *size)
             exit(1);
         }
 	//   Copy each line into the string (use strcpy).
-	strcpy(arr[size], str);
+	    strcpy(arr[*size], temp);
+        
+	// The size needs to be incremented inside the loop.
+	    (*size)++;
 	}
     // Close the file.
 	fclose(in);
 	
-	// The size should be the number of entries in the array.
-	(*size)++;
 	
 	// Return pointer to the array of strings.
 	return arr;
